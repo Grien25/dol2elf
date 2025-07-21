@@ -1,25 +1,47 @@
 # DOL 2 ELF
 
-Create a ELF executable file from a [DOL](http://wiibrew.org/wiki/DOL) file.
+Create an ELF executable file from a [DOL](http://wiibrew.org/wiki/DOL) file.
 
-Usage:
+## Usage
 
 ~~~sh
 dol2elf foo.dol foo.elf
 ~~~
 
-The generated ELF file is currently a dummy ELF file. It is not meant to be
-executed but to be read by standard tools which do not groke the DOL format
-(objdump, gdb, radare2).
+## What this tool does
 
-Currently what it includes:
+This tool takes a GameCube/Wii DOL binary and produces a 32-bit PowerPC ELF file that can be read by standard tools (such as `objdump`, `gdb`, `radare2`) that do not natively support the DOL format. The generated ELF is not meant to be executed, but is useful for analysis and inspection.
 
- * one ELF segment for each DOL segment;
+### Conversion Details
 
- * one section for each DOL segment;
+- **Segments and Sections:**
+  - Each non-empty DOL text segment becomes both an ELF program segment (PT_LOAD) and a section (named `.text.N`).
+  - Each non-empty DOL data segment becomes both an ELF program segment (PT_LOAD) and a section (named `.data.N`).
+  - If the DOL has a BSS segment, it is mapped to both an ELF PT_LOAD segment and a `.bss` section (with SHT_NOBITS type).
+- **Section Names:**
+  - Section names are generated as `.text.0`, `.text.1`, ..., `.data.0`, `.data.1`, ..., and `.bss` as appropriate.
+  - A `.shstrtab` section is included for section names.
+  - A `.dolhdr` section contains a copy of the DOL header.
+- **String Table:**
+  - The ELF includes a `.shstrtab` section containing all section names.
+- **DOL Header:**
+  - The DOL file header is copied into a `.dolhdr` section for reference.
+- **File Layout:**
+  - The ELF header, program headers, and section headers are written first.
+  - The section name string table follows.
+  - The entire DOL file is then copied verbatim at the end of the ELF file (after the ELF headers and string table).
 
- * a `.strtab` section (section names);
+### Limitations
 
- * a copy of the DOL header in a `.dolhdr` section.
+- The resulting ELF is a static, non-relocatable, non-executable file intended for analysis only.
+- No symbol or relocation information is generated.
+- The ELF is always big-endian, 32-bit, and marked as PowerPC architecture.
 
-In fact, the whole DOL file is copied verbatim at the end of the ELF file.
+## Example
+
+~~~sh
+./dol2elf foo.dol foo.elf
+objdump -h foo.elf
+~~~
+
+This will show ELF sections corresponding to the DOL segments, plus `.shstrtab` and `.dolhdr`.
