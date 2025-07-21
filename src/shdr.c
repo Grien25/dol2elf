@@ -24,7 +24,7 @@ THE SOFTWARE.
 #include <assert.h>
 #include <stdlib.h>
 
-#include <elf.h>
+#include "elf.h"
 #include <arpa/inet.h>
 
 #include "doltool.h"

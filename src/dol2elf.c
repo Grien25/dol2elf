@@ -28,7 +28,7 @@ THE SOFTWARE.
 #include <inttypes.h>
 #include <arpa/inet.h>
 
-#include <elf.h>
+#include "elf.h"
 
 #include "doltool.h"
 

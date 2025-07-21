@@ -27,7 +27,7 @@ THE SOFTWARE.
 #include <stdint.h>
 #include <stdio.h>
 
-#include <elf.h>
+#include "elf.h"
 
 #define DOL_TEXT_COUNT 7
 #define DOL_DATA_COUNT 11
